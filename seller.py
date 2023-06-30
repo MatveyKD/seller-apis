@@ -146,6 +146,9 @@ def price_conversion(price: str) -> str:
         \>>> price_conversion(price)
         5990
 
+        \>>> price = "1wd4"
+        \>>>price_conversion(price)
+        14
     """
     return re.sub("[^0-9]", "", price.split(".")[0])
 
