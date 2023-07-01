@@ -12,7 +12,21 @@ logger = logging.getLogger(__file__)
 
 
 def get_product_list(last_id, client_id, seller_token):
-    """Получить список товаров магазина озон"""
+    """Получить список товаров магазина озон.
+
+    Отправить запрос на сайт озон и получить список товаров.
+
+    Аргументы:
+        last_id (str): идентификатор прошлого запроса ("" в момент отправки первого)
+        client_id (str): уникальный идентификатор клиента озон
+        seller_token (str): уникальный идентификатор продавца озон
+
+    Возвращаемые значения:
+        dict: Список продуктов
+
+    Исключения:
+        HTTPSConnectionPool(host='api-seller.ozon.ru', port=443): Max retries exceeded with url: /v2/product/list (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000001743C7C53D0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed')) Ошибка соединения.
+    """
     url = "https://api-seller.ozon.ru/v2/product/list"
     headers = {
         "Client-Id": client_id,
@@ -32,7 +46,19 @@ def get_product_list(last_id, client_id, seller_token):
 
 
 def get_offer_ids(client_id, seller_token):
-    """Получить артикулы товаров магазина озон"""
+    """Получить артикулы товаров магазина озон.
+
+    Из общего списка товаров магазина озон получить список артикулов.
+
+    Аргументы:
+        client_id (str): уникальный идентификатор клиента озон
+        seller_token (str): уникальный идентификатор продавца озон
+
+    Возвращаемые значения:
+        list: список артикулов
+    Исключения:
+        HTTPSConnectionPool(host='api-seller.ozon.ru', port=443): Max retries exceeded with url: /v2/product/list (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000001743C7C53D0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed')) Ошибка соединения.
+    """
     last_id = ""
     product_list = []
     while True:
@@ -49,7 +75,20 @@ def get_offer_ids(client_id, seller_token):
 
 
 def update_price(prices: list, client_id, seller_token):
-    """Обновить цены товаров"""
+    """Обновить цены товаров на сайте.
+
+    Обновить цены товаров, отправив запрос на сайт озон.
+
+    Аргументы:
+        prices (list): список цен
+        client_id (str): уникальный идентификатор клиента озон
+        seller_token (str): уникальный идентификатор продавца озон
+
+    Возвращаемые значения:
+        dict: ответ от сайта
+    Исключения:
+        HTTPSConnectionPool(host='api-seller.ozon.ru', port=443): Max retries exceeded with url: /v2/product/list (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000001743C7C53D0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed')) Ошибка соединения.
+    """
     url = "https://api-seller.ozon.ru/v1/product/import/prices"
     headers = {
         "Client-Id": client_id,
@@ -62,7 +101,21 @@ def update_price(prices: list, client_id, seller_token):
 
 
 def update_stocks(stocks: list, client_id, seller_token):
-    """Обновить остатки"""
+    """Обновить остатки на сайте.
+
+    Обновить остатки товаров, отправив запрос на сайт озон.
+
+    Аргументы:
+        stocks (list): список остатков
+        client_id (str): уникальный идентификатор клиента озон
+        seller_token (str): уникальный идентификатор продавца озон
+
+    Возвращаемые значения:
+        dict: ответ от сайта
+
+    Исключения:
+        HTTPSConnectionPool(host='api-seller.ozon.ru', port=443): Max retries exceeded with url: /v2/product/list (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000001743C7C53D0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed')) Ошибка соединения.
+    """
     url = "https://api-seller.ozon.ru/v1/product/import/stocks"
     headers = {
         "Client-Id": client_id,
@@ -75,7 +128,16 @@ def update_stocks(stocks: list, client_id, seller_token):
 
 
 def download_stock():
-    """Скачать файл ostatki с сайта casio"""
+    """Скачать файл ostatki с сайта casio.
+
+    Скачать файл ostatki.zip с сайта casio, получить из него данные и удалить файл.
+
+    Возвращаемые значения:
+        list: данные об остатках из файла
+
+    Исключения:
+        HTTPSConnectionPool(host='api-seller.ozon.ru', port=443): Max retries exceeded with url: /v2/product/list (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000001743C7C53D0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed')) Ошибка соединения.
+    """
     # Скачать остатки с сайта
     casio_url = "https://timeworld.ru/upload/files/ostatki.zip"
     session = requests.Session()
@@ -96,6 +158,20 @@ def download_stock():
 
 
 def create_stocks(watch_remnants, offer_ids):
+    """Структуризовать список остатков.
+
+    Структуризовать список остатков, добавить недостающее и привести список к единому виду.
+
+    Аргументы:
+        watch_remnants (list): данные об остатках с сайта
+        offer_ids (list): список артикулов
+
+    Возвращаемые значения:
+        list: дополненный список остатков
+
+    Исключения:
+        HTTPSConnectionPool(host='api-seller.ozon.ru', port=443): Max retries exceeded with url: /v2/product/list (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000001743C7C53D0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed')) Ошибка соединения.
+    """
     # Уберем то, что не загружено в seller
     stocks = []
     for watch in watch_remnants:
@@ -116,6 +192,20 @@ def create_stocks(watch_remnants, offer_ids):
 
 
 def create_prices(watch_remnants, offer_ids):
+    """Получить список цен.
+
+    Из общего списка данных получить список цен в нужной форме
+
+    Аргументы:
+        watch_remnants (list): общий список данных
+        offer_ids (list): список артикулов
+
+    Возвращаемые значения:
+        list: структурированный список цен
+
+    Исключения:
+        HTTPSConnectionPool(host='api-seller.ozon.ru', port=443): Max retries exceeded with url: /v2/product/list (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000001743C7C53D0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed')) Ошибка соединения.
+    """
     prices = []
     for watch in watch_remnants:
         if str(watch.get("Код")) in offer_ids:
@@ -160,6 +250,18 @@ def divide(lst: list, n: int):
 
 
 async def upload_prices(watch_remnants, client_id, seller_token):
+    """Структурировать список цен и отправить их на сайт озон
+
+    Аргументы:
+        watch_remnants (list): общий список данных
+        client_id (str): уникальный идентификатор клиента озон
+        seller_token (str): уникальный идентификатор продавца озон
+    Возвращаемые значения:
+        list: структурированный список цен
+
+    Исключения:
+        HTTPSConnectionPool(host='api-seller.ozon.ru', port=443): Max retries exceeded with url: /v2/product/list (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000001743C7C53D0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed')) Ошибка соединения.
+    """
     offer_ids = get_offer_ids(client_id, seller_token)
     prices = create_prices(watch_remnants, offer_ids)
     for some_price in list(divide(prices, 1000)):
@@ -168,6 +270,19 @@ async def upload_prices(watch_remnants, client_id, seller_token):
 
 
 async def upload_stocks(watch_remnants, client_id, seller_token):
+    """Структурировать список остатков и отправить их на сайт озон
+
+        Аргументы:
+            watch_remnants (list): общий список данных
+            client_id (str): уникальный идентификатор клиента озон
+            seller_token (str): уникальный идентификатор продавца озон
+        Возвращаемые значения:
+            list: список товаров с положительными остатками
+            list: структурированный список остатков
+
+        Исключения:
+            HTTPSConnectionPool(host='api-seller.ozon.ru', port=443): Max retries exceeded with url: /v2/product/list (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000001743C7C53D0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed')) Ошибка соединения.
+    """
     offer_ids = get_offer_ids(client_id, seller_token)
     stocks = create_stocks(watch_remnants, offer_ids)
     for some_stock in list(divide(stocks, 100)):
