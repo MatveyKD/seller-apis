@@ -11,6 +11,16 @@ logger = logging.getLogger(__file__)
 
 
 def get_product_list(page, campaign_id, access_token):
+    """Получить список товаров с сайта yandex market
+
+    Аргументы:
+        page (str): номер страницы
+        campaign_id (str): идентификатор компании-продавца
+        access_token (str): ключ доступа для маркетплейса
+
+    Возвращаемые значения:
+        dict: ответ от сайта
+    """
     endpoint_url = "https://api.partner.market.yandex.ru/"
     headers = {
         "Content-Type": "application/json",
@@ -30,6 +40,16 @@ def get_product_list(page, campaign_id, access_token):
 
 
 def update_stocks(stocks, campaign_id, access_token):
+    """Загрузить данные об остатках на сайт yandex market
+
+        Аргументы:
+            stocks (list): данные об остатках
+            campaign_id (str): идентификатор компании-продавца
+            access_token (str): ключ доступа для маркетплейса
+
+        Возвращаемые значения:
+            dict: ответ от сайта
+    """
     endpoint_url = "https://api.partner.market.yandex.ru/"
     headers = {
         "Content-Type": "application/json",
@@ -46,6 +66,16 @@ def update_stocks(stocks, campaign_id, access_token):
 
 
 def update_price(prices, campaign_id, access_token):
+    """Загрузить данные об остатках на сайт yandex market
+
+        Аргументы:
+            prices (str): данные о ценах
+            campaign_id (str): идентификатор компании-продавца
+            access_token (str): ключ доступа для маркетплейса
+
+        Возвращаемые значения:
+            dict: ответ от сайта
+    """
     endpoint_url = "https://api.partner.market.yandex.ru/"
     headers = {
         "Content-Type": "application/json",
@@ -62,7 +92,17 @@ def update_price(prices, campaign_id, access_token):
 
 
 def get_offer_ids(campaign_id, market_token):
-    """Получить артикулы товаров Яндекс маркета"""
+    """Получить артикулы товаров магазина яндекс маркет.
+
+    Из общего списка товаров магазина яндекс маркет получить список артикулов.
+
+    Аргументы:
+        campaign_id (str): идентификатор компании-продавца
+        market_token (str): ключ доступа для маркетплейса
+
+    Возвращаемые значения:
+        list: список артикулов
+    """
     page = ""
     product_list = []
     while True:
@@ -78,6 +118,21 @@ def get_offer_ids(campaign_id, market_token):
 
 
 def create_stocks(watch_remnants, offer_ids, warehouse_id):
+    """Структуризовать список остатков.
+
+    Структуризовать список остатков, добавить недостающее и привести список к единому виду.
+
+    Аргументы:
+        watch_remnants (list): данные об остатках с сайта
+        offer_ids (list): список артикулов
+        warehouse_id (str): ключ доступа для FBS или DBS
+
+    Возвращаемые значения:
+        list: дополненный список остатков
+
+    Исключения:
+        HTTPSConnectionPool(host='api-seller.ozon.ru', port=443): Max retries exceeded with url: /v2/product/list (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000001743C7C53D0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed')) Ошибка соединения.
+    """
     # Уберем то, что не загружено в market
     stocks = list()
     date = str(datetime.datetime.utcnow().replace(microsecond=0).isoformat() + "Z")
@@ -123,6 +178,20 @@ def create_stocks(watch_remnants, offer_ids, warehouse_id):
 
 
 def create_prices(watch_remnants, offer_ids):
+    """Получить список цен.
+
+    Из общего списка данных получить список цен в нужной форме
+
+    Аргументы:
+        watch_remnants (list): общий список данных
+        offer_ids (list): список артикулов
+
+    Возвращаемые значения:
+        list: структурированный список цен
+
+    Исключения:
+        HTTPSConnectionPool(host='api-seller.ozon.ru', port=443): Max retries exceeded with url: /v2/product/list (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000001743C7C53D0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed')) Ошибка соединения.
+    """
     prices = []
     for watch in watch_remnants:
         if str(watch.get("Код")) in offer_ids:
@@ -143,6 +212,18 @@ def create_prices(watch_remnants, offer_ids):
 
 
 async def upload_prices(watch_remnants, campaign_id, market_token):
+    """Структурировать список цен и отправить их на сайт озон
+
+    Аргументы:
+        watch_remnants (list): общий список данных
+        client_id (str): уникальный идентификатор клиента озон
+        market_token (str): уникальный идентификатор маркетплейса
+    Возвращаемые значения:
+        list: структурированный список цен
+
+    Исключения:
+        HTTPSConnectionPool(host='api-seller.ozon.ru', port=443): Max retries exceeded with url: /v2/product/list (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000001743C7C53D0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed')) Ошибка соединения.
+    """
     offer_ids = get_offer_ids(campaign_id, market_token)
     prices = create_prices(watch_remnants, offer_ids)
     for some_prices in list(divide(prices, 500)):
@@ -151,6 +232,20 @@ async def upload_prices(watch_remnants, campaign_id, market_token):
 
 
 async def upload_stocks(watch_remnants, campaign_id, market_token, warehouse_id):
+    """Структурировать список остатков и отправить их на сайт яндекс маркет
+
+    Аргументы:
+        watch_remnants (list): общий список данных
+        campaign_id (str): идентификатор компании-продавца
+        market_token (str): уникальный идентификатор маркетплейса
+        warehouse_id (str): ключ доступа для FBS или DBS
+    Возвращаемые значения:
+        list: список товаров с положительными остатками
+        list: структурированный список остатков
+
+    Исключения:
+        HTTPSConnectionPool(host='api-seller.ozon.ru', port=443): Max retries exceeded with url: /v2/product/list (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000001743C7C53D0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed')) Ошибка соединения.
+    """
     offer_ids = get_offer_ids(campaign_id, market_token)
     stocks = create_stocks(watch_remnants, offer_ids, warehouse_id)
     for some_stock in list(divide(stocks, 2000)):
