@@ -19,7 +19,7 @@ def get_product_list(page, campaign_id, access_token):
         access_token (str): ключ доступа для маркетплейса
 
     Возвращаемые значения:
-        dict: ответ от сайта
+        dict: список товаров от сайта
     """
     endpoint_url = "https://api.partner.market.yandex.ru/"
     headers = {
@@ -66,7 +66,7 @@ def update_stocks(stocks, campaign_id, access_token):
 
 
 def update_price(prices, campaign_id, access_token):
-    """Загрузить данные об остатках на сайт yandex market
+    """Загрузить данные о ценах на сайт yandex market
 
         Аргументы:
             prices (str): данные о ценах
